@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\common.props" />
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <RootNamespace>Boss.UnifiedAuth</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Boss.UnifiedAuth.Application\Boss.UnifiedAuth.Application.csproj" />
+    <ProjectReference Include="..\Boss.UnifiedAuth.Domain.Tests\Boss.UnifiedAuth.Domain.Tests.csproj" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.6.1" />
+  </ItemGroup>
+
+</Project>
