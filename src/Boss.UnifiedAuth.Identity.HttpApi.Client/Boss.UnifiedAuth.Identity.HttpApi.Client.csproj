@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Volo.Abp.Http.Client" Version="3.0.4" />
+    <PackageReference Include="Volo.Abp.Identity.HttpApi.Client" Version="3.0.4" />
     <ProjectReference Include="..\Boss.UnifiedAuth.Identity.Application.Contracts\Boss.UnifiedAuth.Identity.Application.Contracts.csproj" />
   </ItemGroup>
 

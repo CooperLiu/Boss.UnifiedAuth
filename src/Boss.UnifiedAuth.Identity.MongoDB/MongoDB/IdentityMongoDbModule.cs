@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Volo.Abp.Identity.MongoDB;
 using Volo.Abp.Modularity;
 using Volo.Abp.MongoDB;
 
@@ -6,7 +7,8 @@ namespace Boss.UnifiedAuth.Identity.MongoDB
 {
     [DependsOn(
         typeof(IdentityDomainModule),
-        typeof(AbpMongoDbModule)
+        typeof(AbpMongoDbModule),
+        typeof(AbpIdentityMongoDbModule)
         )]
     public class IdentityMongoDbModule : AbpModule
     {

@@ -1,12 +1,14 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Volo.Abp.EntityFrameworkCore;
+using Volo.Abp.Identity.EntityFrameworkCore;
 using Volo.Abp.Modularity;
 
 namespace Boss.UnifiedAuth.Identity.EntityFrameworkCore
 {
     [DependsOn(
         typeof(IdentityDomainModule),
-        typeof(AbpEntityFrameworkCoreModule)
+        typeof(AbpEntityFrameworkCoreModule),
+        typeof(AbpIdentityEntityFrameworkCoreModule)
     )]
     public class IdentityEntityFrameworkCoreModule : AbpModule
     {

@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Volo.Abp.EntityFrameworkCore;
+using Volo.Abp.Identity.EntityFrameworkCore;
 
 namespace Boss.UnifiedAuth.Identity.EntityFrameworkCore
 {
@@ -15,6 +16,7 @@ namespace Boss.UnifiedAuth.Identity.EntityFrameworkCore
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.ConfigureUserIdentity();
             modelBuilder.ConfigureIdentity();
         }
     }

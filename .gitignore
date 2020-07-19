@@ -252,7 +252,5 @@ paket-files/
 *.sln.iml
 
 # UnifiedAuth
-host/Boss.UnifiedAuth.IdentityServer/Logs/logs.txt
-host/Boss.UnifiedAuth.HttpApi.Host/Logs/logs.txt
-host/Boss.UnifiedAuth.Web.Host/Logs/logs.txt
-host/Boss.UnifiedAuth.Web.Unified/Logs/logs.txt
+host/*/Logs/*.txt
+host/*/Logs/*.log

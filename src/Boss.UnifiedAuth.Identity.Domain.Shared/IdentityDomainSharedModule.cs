@@ -5,11 +5,13 @@ using Volo.Abp.Localization.ExceptionHandling;
 using Volo.Abp.Validation;
 using Volo.Abp.Validation.Localization;
 using Volo.Abp.VirtualFileSystem;
+using Volo.Abp.Identity;
 
 namespace Boss.UnifiedAuth.Identity
 {
     [DependsOn(
-        typeof(AbpValidationModule)
+        typeof(AbpValidationModule),
+        typeof(AbpIdentityDomainSharedModule)
     )]
     public class IdentityDomainSharedModule : AbpModule
     {

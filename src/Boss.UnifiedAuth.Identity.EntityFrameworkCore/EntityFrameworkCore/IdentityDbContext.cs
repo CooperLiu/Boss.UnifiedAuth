@@ -21,7 +21,7 @@ namespace Boss.UnifiedAuth.Identity.EntityFrameworkCore
         {
             base.OnModelCreating(builder);
 
-            builder.ConfigureIdentity();
+            builder.ConfigureUserIdentity();
         }
     }
 }

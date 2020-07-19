@@ -19,7 +19,7 @@ namespace Boss.UnifiedAuth
 #endif
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
                 .Enrich.FromLogContext()
-                .WriteTo.File("Logs/logs.txt")
+                .WriteTo.File("Logs/logs.log")
                 .CreateLogger();
 
             try

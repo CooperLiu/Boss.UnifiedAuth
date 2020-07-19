@@ -6,7 +6,7 @@ namespace Boss.UnifiedAuth.Identity.EntityFrameworkCore
 {
     public static class IdentityDbContextModelCreatingExtensions
     {
-        public static void ConfigureIdentity(
+        public static void ConfigureUserIdentity(
             this ModelBuilder builder,
             Action<IdentityModelBuilderConfigurationOptions> optionsAction = null)
         {

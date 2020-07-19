@@ -9,7 +9,8 @@ namespace Boss.UnifiedAuth.Identity
         typeof(IdentityDomainModule),
         typeof(IdentityApplicationContractsModule),
         typeof(AbpDddApplicationModule),
-        typeof(AbpAutoMapperModule)
+        typeof(AbpAutoMapperModule),
+        typeof(AbpDddApplicationModule)
         )]
     public class IdentityApplicationModule : AbpModule
     {
