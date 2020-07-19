@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\common.props" />
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <RootNamespace>Boss.UnifiedAuth.AuthServer</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Volo.Abp.EntityFrameworkCore" Version="3.0.4" />
+    <PackageReference Include="Volo.Abp.IdentityServer.EntityFrameworkCore" Version="3.0.4" />
+    <ProjectReference Include="..\Boss.UnifiedAuth.AuthServer.Domain\Boss.UnifiedAuth.AuthServer.Domain.csproj" />
+  </ItemGroup>
+
+</Project>

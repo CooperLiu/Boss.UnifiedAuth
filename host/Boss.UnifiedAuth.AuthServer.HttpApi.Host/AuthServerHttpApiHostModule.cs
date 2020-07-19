@@ -1,79 +1,54 @@
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Security.Claims;
+using IdentityModel;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.DataProtection;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Boss.UnifiedAuth.AuthServer.EntityFrameworkCore;
 using Boss.UnifiedAuth.MultiTenancy;
 using StackExchange.Redis;
 using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.Swagger;
 using Volo.Abp;
-using Volo.Abp.Account;
-using Volo.Abp.Account.Web;
-using Volo.Abp.AspNetCore.Authentication.JwtBearer;
-using Volo.Abp.AspNetCore.Mvc;
+using Volo.Abp.AspNetCore.MultiTenancy;
 using Volo.Abp.AspNetCore.Mvc.UI.MultiTenancy;
-using Volo.Abp.AspNetCore.Mvc.UI.Theme.Basic;
 using Volo.Abp.AspNetCore.Mvc.UI.Theme.Shared;
 using Volo.Abp.AspNetCore.Serilog;
-using Volo.Abp.Auditing;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.Autofac;
 using Volo.Abp.Caching;
 using Volo.Abp.Caching.StackExchangeRedis;
-using Volo.Abp.Data;
 using Volo.Abp.EntityFrameworkCore;
 using Volo.Abp.EntityFrameworkCore.SqlServer;
-using Volo.Abp.FeatureManagement;
-using Volo.Abp.Identity;
-using Volo.Abp.Identity.EntityFrameworkCore;
-using Volo.Abp.IdentityServer.EntityFrameworkCore;
 using Volo.Abp.Localization;
 using Volo.Abp.Modularity;
 using Volo.Abp.MultiTenancy;
-using Volo.Abp.PermissionManagement;
 using Volo.Abp.PermissionManagement.EntityFrameworkCore;
-using Volo.Abp.PermissionManagement.HttpApi;
-using Volo.Abp.PermissionManagement.Identity;
+using Volo.Abp.Security.Claims;
 using Volo.Abp.SettingManagement.EntityFrameworkCore;
-using Volo.Abp.TenantManagement;
-using Volo.Abp.TenantManagement.EntityFrameworkCore;
-using Volo.Abp.Threading;
-using Volo.Abp.UI.Navigation.Urls;
-using Boss.UnifiedAuth.AuthServer;
+using Volo.Abp.VirtualFileSystem;
 
-namespace Boss.UnifiedAuth
+namespace Boss.UnifiedAuth.AuthServer
 {
     [DependsOn(
-        typeof(AbpAccountWebIdentityServerModule),
-        typeof(AbpAccountApplicationModule),
+        typeof(AuthServerApplicationModule),
+        typeof(AuthServerEntityFrameworkCoreModule),
+        typeof(AuthServerHttpApiModule),
         typeof(AbpAspNetCoreMvcUiMultiTenancyModule),
-        typeof(AbpAspNetCoreMvcModule),
-        typeof(AbpAspNetCoreMvcUiBasicThemeModule),
-        typeof(AbpAuditLoggingEntityFrameworkCoreModule),
         typeof(AbpAutofacModule),
         typeof(AbpCachingStackExchangeRedisModule),
         typeof(AbpEntityFrameworkCoreSqlServerModule),
-        typeof(AbpIdentityEntityFrameworkCoreModule),
-        typeof(AbpIdentityApplicationModule),
-        typeof(AbpIdentityHttpApiModule),
-        typeof(AbpIdentityServerEntityFrameworkCoreModule),
-        typeof(AbpPermissionManagementDomainIdentityModule),
+        typeof(AbpAuditLoggingEntityFrameworkCoreModule),
         typeof(AbpPermissionManagementEntityFrameworkCoreModule),
-        typeof(AbpPermissionManagementApplicationModule),
-        typeof(AbpPermissionManagementHttpApiModule),
         typeof(AbpSettingManagementEntityFrameworkCoreModule),
-        typeof(AbpFeatureManagementApplicationModule),
-        typeof(AbpTenantManagementEntityFrameworkCoreModule),
-        typeof(AbpTenantManagementApplicationModule),
-        typeof(AbpTenantManagementHttpApiModule),
-        typeof(AbpAspNetCoreAuthenticationJwtBearerModule),
-        typeof(AuthServerApplicationContractsModule),
         typeof(AbpAspNetCoreSerilogModule)
         )]
-    public class UnifiedAuthIdentityServerModule : AbpModule
+    public class AuthServerHttpApiHostModule : AbpModule
     {
         private const string DefaultCorsPolicyName = "Default";
 
@@ -87,10 +62,26 @@ namespace Boss.UnifiedAuth
                 options.UseSqlServer();
             });
 
+            Configure<AbpMultiTenancyOptions>(options =>
+            {
+                options.IsEnabled = MultiTenancyConsts.IsEnabled;
+            });
+
+            if (hostingEnvironment.IsDevelopment())
+            {
+                Configure<AbpVirtualFileSystemOptions>(options =>
+                {
+                    options.FileSets.ReplaceEmbeddedByPhysical<AuthServerDomainSharedModule>(Path.Combine(hostingEnvironment.ContentRootPath, string.Format("..{0}..{0}src{0}Boss.UnifiedAuth.AuthServer.Domain.Shared", Path.DirectorySeparatorChar)));
+                    options.FileSets.ReplaceEmbeddedByPhysical<AuthServerDomainModule>(Path.Combine(hostingEnvironment.ContentRootPath, string.Format("..{0}..{0}src{0}Boss.UnifiedAuth.AuthServer.Domain", Path.DirectorySeparatorChar)));
+                    options.FileSets.ReplaceEmbeddedByPhysical<AuthServerApplicationContractsModule>(Path.Combine(hostingEnvironment.ContentRootPath, string.Format("..{0}..{0}src{0}Boss.UnifiedAuth.AuthServer.Application.Contracts", Path.DirectorySeparatorChar)));
+                    options.FileSets.ReplaceEmbeddedByPhysical<AuthServerApplicationModule>(Path.Combine(hostingEnvironment.ContentRootPath, string.Format("..{0}..{0}src{0}Boss.UnifiedAuth.AuthServer.Application", Path.DirectorySeparatorChar)));
+                });
+            }
+
             context.Services.AddSwaggerGen(
                 options =>
                 {
-                    options.SwaggerDoc("v1", new OpenApiInfo { Title = "UnifiedAuth API", Version = "v1" });
+                    options.SwaggerDoc("v1", new OpenApiInfo { Title = "AuthServer API", Version = "v1" });
                     options.DocInclusionPredicate((docName, description) => true);
                     options.CustomSchemaIds(type => type.FullName);
                 });
@@ -106,33 +97,23 @@ namespace Boss.UnifiedAuth
                 options.Languages.Add(new LanguageInfo("zh-Hant", "zh-Hant", "繁體中文"));
             });
 
-            Configure<AbpAuditingOptions>(options =>
-            {
-                //options.IsEnabledForGetRequests = true;
-                options.ApplicationName = "AuthServer";
-            });
+            //Updates AbpClaimTypes to be compatible with identity server claims.
+            AbpClaimTypes.UserId = JwtClaimTypes.Subject;
+            AbpClaimTypes.UserName = JwtClaimTypes.Name;
+            AbpClaimTypes.Role = JwtClaimTypes.Role;
+            AbpClaimTypes.Email = JwtClaimTypes.Email;
 
-            Configure<AppUrlOptions>(options =>
-            {
-                options.Applications["MVC"].RootUrl = configuration["App:SelfUrl"];
-            });
-
-            context.Services.AddAuthentication()
+            context.Services.AddAuthentication("Bearer")
                 .AddIdentityServerAuthentication(options =>
                 {
                     options.Authority = configuration["AuthServer:Authority"];
                     options.RequireHttpsMetadata = false;
-                    options.ApiName = configuration["AuthServer:ApiName"];
+                    options.ApiName = "AuthServer";
                 });
 
             Configure<AbpDistributedCacheOptions>(options =>
             {
-                options.KeyPrefix = "UnifiedAuth:";
-            });
-
-            Configure<AbpMultiTenancyOptions>(options =>
-            {
-                options.IsEnabled = MultiTenancyConsts.IsEnabled;
+                options.KeyPrefix = "AuthServer:";
             });
 
             if (!hostingEnvironment.IsDevelopment())
@@ -140,7 +121,7 @@ namespace Boss.UnifiedAuth
                 var redis = ConnectionMultiplexer.Connect(configuration["Redis:Configuration"]);
                 context.Services
                     .AddDataProtection()
-                    .PersistKeysToStackExchangeRedis(redis, "UnifiedAuth-Protection-Keys");
+                    .PersistKeysToStackExchangeRedis(redis, "AuthServer-Protection-Keys");
             }
 
             context.Services.AddCors(options =>
@@ -182,17 +163,14 @@ namespace Boss.UnifiedAuth
             app.UseCorrelationId();
             app.UseVirtualFiles();
             app.UseRouting();
-            app.UseCors(DefaultCorsPolicyName); 
+            app.UseCors(DefaultCorsPolicyName);        
             app.UseAuthentication();
-            app.UseJwtTokenMiddleware();
-            
+            app.UseAbpClaimsMap();
             if (MultiTenancyConsts.IsEnabled)
             {
                 app.UseMultiTenancy();
             }
-
             app.UseAbpRequestLocalization();
-            app.UseIdentityServer();
             app.UseAuthorization();
             app.UseSwagger();
             app.UseSwaggerUI(options =>
@@ -202,21 +180,6 @@ namespace Boss.UnifiedAuth
             app.UseAuditing();
             app.UseAbpSerilogEnrichers();
             app.UseConfiguredEndpoints();
-
-            SeedData(context);
-        }
-
-        private void SeedData(ApplicationInitializationContext context)
-        {
-            AsyncHelper.RunSync(async () =>
-            {
-                using (var scope = context.ServiceProvider.CreateScope())
-                {
-                    await scope.ServiceProvider
-                        .GetRequiredService<IDataSeeder>()
-                        .SeedAsync();
-                }
-            });
         }
     }
 }

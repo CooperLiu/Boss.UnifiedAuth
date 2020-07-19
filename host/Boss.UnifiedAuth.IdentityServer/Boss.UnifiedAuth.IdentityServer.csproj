@@ -39,7 +39,7 @@
     <PackageReference Include="Volo.Abp.TenantManagement.HttpApi" Version="3.0.4" />
     <PackageReference Include="Volo.Abp.FeatureManagement.Application" Version="3.0.4" />
     <PackageReference Include="Volo.Abp.FeatureManagement.Application" Version="3.0.4" />
-    <ProjectReference Include="..\..\src\Boss.UnifiedAuth.Application.Contracts\Boss.UnifiedAuth.Application.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\Boss.UnifiedAuth.AuthServer.Application.Contracts\Boss.UnifiedAuth.AuthServer.Application.Contracts.csproj" />
     <ProjectReference Include="..\Boss.UnifiedAuth.Host.Shared\Boss.UnifiedAuth.Host.Shared.csproj" />
   </ItemGroup>
 
