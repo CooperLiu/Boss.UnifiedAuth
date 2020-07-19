@@ -19,7 +19,6 @@ using Volo.Abp.AspNetCore.MultiTenancy;
 using Volo.Abp.AspNetCore.Mvc.UI.MultiTenancy;
 using Volo.Abp.AspNetCore.Mvc.UI.Theme.Shared;
 using Volo.Abp.AspNetCore.Serilog;
-using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.Autofac;
 using Volo.Abp.Caching;
 using Volo.Abp.Caching.StackExchangeRedis;
@@ -32,6 +31,7 @@ using Volo.Abp.PermissionManagement.EntityFrameworkCore;
 using Volo.Abp.Security.Claims;
 using Volo.Abp.SettingManagement.EntityFrameworkCore;
 using Volo.Abp.VirtualFileSystem;
+using Volo.Abp.PermissionManagement.HttpApi;
 
 namespace Boss.UnifiedAuth
 {
@@ -39,11 +39,11 @@ namespace Boss.UnifiedAuth
         typeof(UnifiedAuthApplicationModule),
         typeof(UnifiedAuthEntityFrameworkCoreModule),
         typeof(UnifiedAuthHttpApiModule),
+        typeof(AbpPermissionManagementHttpApiModule),
         typeof(AbpAspNetCoreMvcUiMultiTenancyModule),
         typeof(AbpAutofacModule),
         typeof(AbpCachingStackExchangeRedisModule),
         typeof(AbpEntityFrameworkCoreSqlServerModule),
-        typeof(AbpAuditLoggingEntityFrameworkCoreModule),
         typeof(AbpPermissionManagementEntityFrameworkCoreModule),
         typeof(AbpSettingManagementEntityFrameworkCoreModule),
         typeof(AbpAspNetCoreSerilogModule)
@@ -103,13 +103,21 @@ namespace Boss.UnifiedAuth
             AbpClaimTypes.Role = JwtClaimTypes.Role;
             AbpClaimTypes.Email = JwtClaimTypes.Email;
 
-            context.Services.AddAuthentication("Bearer")
-                .AddIdentityServerAuthentication(options =>
-                {
-                    options.Authority = configuration["AuthServer:Authority"];
-                    options.RequireHttpsMetadata = false;
-                    options.ApiName = "UnifiedAuth";
-                });
+            if (hostingEnvironment.IsDevelopment())
+            {
+                context.Services.AddAlwaysAllowAuthorization();
+            }
+            else
+            {
+                context.Services.AddAuthentication("Bearer")
+               .AddIdentityServerAuthentication(options =>
+                   {
+                       options.Authority = configuration["AuthServer:Authority"];
+                       options.RequireHttpsMetadata = false;
+                       options.ApiName = "UnifiedAuth";
+                   });
+            }
+
 
             Configure<AbpDistributedCacheOptions>(options =>
             {
@@ -163,7 +171,7 @@ namespace Boss.UnifiedAuth
             app.UseCorrelationId();
             app.UseVirtualFiles();
             app.UseRouting();
-            app.UseCors(DefaultCorsPolicyName);        
+            app.UseCors(DefaultCorsPolicyName);
             app.UseAuthentication();
             app.UseAbpClaimsMap();
             if (MultiTenancyConsts.IsEnabled)

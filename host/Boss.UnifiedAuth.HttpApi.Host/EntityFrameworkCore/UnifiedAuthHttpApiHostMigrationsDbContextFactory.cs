@@ -12,7 +12,7 @@ namespace Boss.UnifiedAuth.EntityFrameworkCore
             var configuration = BuildConfiguration();
 
             var builder = new DbContextOptionsBuilder<UnifiedAuthHttpApiHostMigrationsDbContext>()
-                .UseSqlServer(configuration.GetConnectionString("UnifiedAuth"));
+                .UseSqlServer(configuration.GetConnectionString("Default"));
 
             return new UnifiedAuthHttpApiHostMigrationsDbContext(builder.Options);
         }
