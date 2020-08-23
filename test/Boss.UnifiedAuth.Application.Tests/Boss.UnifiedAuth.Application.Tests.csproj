@@ -10,7 +10,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Boss.UnifiedAuth.Application\Boss.UnifiedAuth.Application.csproj" />
     <ProjectReference Include="..\Boss.UnifiedAuth.Domain.Tests\Boss.UnifiedAuth.Domain.Tests.csproj" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.6.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.7.1" />
   </ItemGroup>
 
 </Project>
